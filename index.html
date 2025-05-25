@@ -1,0 +1,384 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>স্ক্যানার</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.7.2/css/all.min.css" integrity="sha512-Evv84Mr4kqVGRNSgIGL/F/aIDqQb7xQ2vcrdIwxfjThSH8CSR7PBEakCr51Ck+w+/U6swU2Im1vVX0SVk9ABhg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <style>
+        :root {
+            --neon-blue: #00f7ff;
+            --neon-purple: #b300ff;
+            --neon-pink: #ff00c8;
+            --dark-bg: #0a0a16;
+            --darker-bg: #050510;
+        }
+        
+        body {
+            font-family: 'Titillium Web', 'Segoe UI', sans-serif;
+            display: flex;
+            flex-direction: column;
+            min-height: 100%;
+            margin: 0;
+            padding: 0;
+            background: var(--dark-bg);
+            color: white;
+            overflow-x: hidden;
+        }
+
+        .content-wrapper {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+        }
+
+        .top-content {
+            padding: 30px 20px;
+            text-align: center;
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        h1 {
+            color: var(--neon-blue);
+            margin-bottom: 20px;
+            font-weight: 600;
+            text-shadow: 0 0 10px var(--neon-blue);
+            letter-spacing: 1px;
+        }
+        
+        p {
+            color: rgba(255, 255, 255, 0.85);
+            line-height: 1.6;
+            max-width: 500px;
+            margin: 0 auto 25px;
+        }
+
+        .instructions {
+            background: rgba(15, 10, 30, 0.5);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 0 auto;
+            max-width: 500px;
+            border: 1px solid rgba(150, 0, 255, 0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .instructions ol {
+            padding-left: 20px;
+            text-align: left;
+            margin-top: 10px;
+        }
+
+        .instructions li {
+            margin-bottom: 10px;
+            color: rgba(255, 255, 255, 0.8);
+        }
+
+        .scanner-section {
+            padding: 30px 20px;
+            background: linear-gradient(to top, rgba(5,5,20,0.9) 0%, transparent 100%);
+        }
+
+        .scanner-container {
+            max-width: 280px;
+            margin: 0 auto;
+            position: relative;
+        }
+
+        .scanner-box {
+            width: 100%;
+            height: 130px;
+            background: rgba(20, 15, 35, 0.7);
+            border-radius: 18px;
+            position: relative;
+            overflow: hidden;
+            border: 1px solid var(--neon-purple);
+            box-shadow: 
+                0 0 20px rgba(150, 0, 255, 0.3),
+                inset 0 0 15px rgba(150, 0, 255, 0.2);
+        }
+
+        .scanner-surface {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+
+        .fingerprint-icon {
+            width: 70px;
+            height: 90px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%23b300ff"><path d="M17.81 4.16c-1.53-1.53-3.58-2.38-5.77-2.38-2.19 0-4.24.85-5.77 2.38-1.53 1.53-2.38 3.58-2.38 5.77 0 .45.36.81.81.81.45 0 .81-.36.81-.81 0-1.78.69-3.45 1.95-4.71 1.26-1.26 2.93-1.95 4.71-1.95 1.78 0 3.45.69 4.71 1.95 1.26 1.26 1.95 2.93 1.95 4.71 0 .45.36.81.81.81.45 0 .81-.36.81-.81 0-2.19-.85-4.24-2.38-5.77z"/><path d="M18.94 12.12c-.45 0-.81.36-.81.81 0 1.78-.69 3.45-1.95 4.71-1.26 1.26-2.93 1.95-4.71 1.95-1.78 0-3.45-.69-4.71-1.95-1.26-1.26-1.95-2.93-1.95-4.71 0-.45-.36-.81-.81-.81-.45 0-.81.36-.81.81 0 2.19.85 4.24 2.38 5.77 1.53 1.53 3.58 2.38 5.77 2.38 2.19 0 4.24-.85 5.77-2.38 1.53-1.53 2.38-3.58 2.38-5.77 0-.45-.36-.81-.81-.81z"/><path d="M12 7.62c-.45 0-.81.36-.81.81v7.62c0 .45.36.81.81.81.45 0 .81-.36.81-.81V8.43c0-.45-.36-.81-.81-.81z"/></svg>');
+            background-repeat: no-repeat;
+            background-position: center;
+            opacity: 0.8;
+            z-index: 1;
+            filter: drop-shadow(0 0 8px var(--neon-purple));
+        }
+
+        .scan-line {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 3px;
+            background: linear-gradient(to right, transparent, var(--neon-blue), transparent);
+            z-index: 2;
+            box-shadow: 0 0 15px var(--neon-blue);
+            display: none;
+            animation: scan 1.5s infinite;
+        }
+
+        @keyframes scan {
+            0% { top: 0%; opacity: 0; }
+            10% { opacity: 1; }
+            90% { opacity: 1; }
+            100% { top: 100%; opacity: 0; }
+        }
+
+        .scanner-status {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 15px;
+            color: var(--neon-blue);
+            text-shadow: 0 0 8px var(--neon-blue);
+            min-height: 22px;
+        }
+
+        .corner {
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-blue);
+            z-index: 3;
+        }
+
+        .corner-tl {
+            top: 10px;
+            left: 10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .corner-tr {
+            top: 10px;
+            right: 10px;
+            border-left: none;
+            border-bottom: none;
+        }
+
+        .corner-bl {
+            bottom: 10px;
+            left: 10px;
+            border-right: none;
+            border-top: none;
+        }
+
+        .corner-br {
+            bottom: 10px;
+            right: 10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        .success {
+            color: var(--neon-blue) !important;
+            text-shadow: 0 0 10px var(--neon-blue) !important;
+        }
+        
+        .error {
+            color: var(--neon-pink) !important;
+            text-shadow: 0 0 10px var(--neon-pink) !important;
+        }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=Titillium+Web:wght@400;600&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="content-wrapper">
+        <div class="top-content">
+            <div>
+                <h1>ফিঙ্গারপ্রিন্ট ভেরিফিকেশন</h1>
+                <p>সিস্টেমে অ্যাক্সেস পেতে আপনার আঙুল স্ক্যানারে রাখুন</p>
+            </div>
+
+            <div class="instructions">
+                <strong>সঠিকভাবে স্ক্যান করতে:</strong>
+                <ol>
+                    <li>আঙুল স্ক্যানারের উপর রেখে চাপ দিন</li>
+
+                    <li>স্ক্যান শেষ না হওয়া পর্যন্ত ধরে রাখুন</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="scanner-section">
+            <div class="scanner-container">
+                <div class="scanner-box">
+                    <div class="corner corner-tl"></div>
+                    <div class="corner corner-tr"></div>
+                    <div class="corner corner-bl"></div>
+                    <div class="corner corner-br"></div>
+                    
+                    <div class="scanner-surface" id="scannerSurface">
+                        <div class="fingerprint-icon"></div>
+                        <div class="scan-line" id="scanLine"></div>
+                    </div>
+                </div>
+                
+                <div class="scanner-status" id="scannerStatus">স্ক্যানারের উপর আঙুল রাখুন</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Configuration
+        const SCAN_DURATION = 8000; // 8 seconds
+        const REQUIRED_DOWN_MOVEMENT = 1; // pixels
+        const REQUIRED_RIGHT_MOVEMENT = 1; // pixels
+        
+        // Elements
+        const scannerSurface = document.getElementById('scannerSurface');
+        const scanLine = document.getElementById('scanLine');
+        const scannerStatus = document.getElementById('scannerStatus');
+        
+        // State
+        let isScanning = false;
+        let scanStartTime;
+        let scanTimeout;
+        let startPos = { x: 0, y: 0 };
+        
+        // Start scanning
+        function startScan(clientX, clientY) {
+            if (isScanning) return;
+            
+            const rect = scannerSurface.getBoundingClientRect();
+            startPos = {
+                x: clientX - rect.left,
+                y: clientY - rect.top
+            };
+            
+            isScanning = true;
+            scanStartTime = Date.now();
+            
+            // Show scan line and start animation
+            scanLine.style.display = 'block';
+            
+            // Update UI
+            scannerStatus.textContent = "স্ক্যান করা হচ্ছে...";
+            scannerStatus.className = "scanner-status";
+            
+            // Start scan timeout
+            scanTimeout = setTimeout(() => {
+                if (isScanning) {
+                    endScan(false, "সময় শেষ! আবার চেষ্টা করুন");
+                }
+            }, SCAN_DURATION);
+        }
+        
+        // End scanning
+        function endScan(success, message) {
+            clearTimeout(scanTimeout);
+            isScanning = false;
+            
+            // Hide scan line
+            scanLine.style.display = 'none';
+            
+            if (success) {
+                // Successful scan
+                scannerStatus.textContent = "ভেরিফিকেশন সফল!";
+                scannerStatus.className = "scanner-status success";
+                
+                // Redirect after 1.5 seconds
+                setTimeout(() => {
+                    window.location.href = "welcome.html";
+                }, 1500);
+            } else {
+                // Failed scan
+                scannerStatus.textContent = message || "ভেরিফিকেশন ব্যর্থ!";
+                scannerStatus.className = "scanner-status error";
+                
+                // Reset after 3 seconds
+                setTimeout(() => {
+                    resetScanner();
+                }, 3000);
+            }
+        }
+        
+        // Reset scanner
+        function resetScanner() {
+            scannerStatus.textContent = "স্ক্যানারের উপর আঙুল রাখুন";
+            scannerStatus.className = "scanner-status";
+        }
+        
+        // Check movement
+        function checkMovement(currentX, currentY) {
+            const downMovement = currentY - startPos.y;
+            const rightMovement = currentX - startPos.x;
+            
+            return downMovement > REQUIRED_DOWN_MOVEMENT && 
+                   rightMovement > REQUIRED_RIGHT_MOVEMENT;
+        }
+        
+        // Event listeners
+        scannerSurface.addEventListener('mousedown', (e) => {
+            startScan(e.clientX, e.clientY);
+        });
+        
+        scannerSurface.addEventListener('mousemove', (e) => {
+            if (!isScanning) return;
+            
+            const rect = scannerSurface.getBoundingClientRect();
+            const currentX = e.clientX - rect.left;
+            const currentY = e.clientY - rect.top;
+            
+            if (checkMovement(currentX, currentY)) {
+                endScan(true, "ভেরিফিকেশন সফল!");
+            }
+        });
+        
+        scannerSurface.addEventListener('mouseup', () => {
+            if (isScanning) {
+                endScan(false, "স্ক্যান অসম্পূর্ণ!");
+            }
+        });
+        
+        scannerSurface.addEventListener('mouseleave', () => {
+            if (isScanning) {
+                endScan(false, "স্ক্যান বাতিল!");
+            }
+        });
+        
+        // Touch events for mobile
+        scannerSurface.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            startScan(e.touches[0].clientX, e.touches[0].clientY);
+        });
+        
+        scannerSurface.addEventListener('touchmove', (e) => {
+            if (!isScanning) return;
+            e.preventDefault();
+            
+            const rect = scannerSurface.getBoundingClientRect();
+            const currentX = e.touches[0].clientX - rect.left;
+            const currentY = e.touches[0].clientY - rect.top;
+            
+            if (checkMovement(currentX, currentY)) {
+                endScan(true, "ভেরিফিকেশন সফল!");
+            }
+        });
+        
+        scannerSurface.addEventListener('touchend', (e) => {
+            if (isScanning) {
+                e.preventDefault();
+                endScan(false, "স্ক্যান অসম্পূর্ণ!");
+            }
+        });
+    </script>
+</body>
+</html>
